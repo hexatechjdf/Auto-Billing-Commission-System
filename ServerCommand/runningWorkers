@@ -1,0 +1,58 @@
+
+
+Supervisor Install Commands
+
+sudo dnf update -y
+sudo dnf install -y epel-release
+sudo dnf install -y supervisor
+sudo systemctl enable supervisord
+sudo systemctl start supervisord
+sudo supervisorctl status
+
+#if nano missing
+
+sudo dnf install nano
+
+#check for supervisor config path
+sudo nano /etc/supervisord.conf
+# in the last find [include] files then set files to
+files = /etc/supervisord.d/*.conf
+
+#now Create worker file
+sudo nano /etc/supervisord.d/laravel-worker.conf
+
+[program:refresh-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /home/caroline/public_html/artisan queue:work --queue="refresh_token" --sleep=2 --tries=1
+autostart=true
+autorestart=true
+user=caroline
+numprocs=3
+redirect_stderr=true
+stdout_logfile=/home/caroline/public_html/storage/logs/refresh-worker.log
+stopwaitsecs=3600
+
+#create as many as needed
+
+
+
+
+
+
+
+sudo nano /etc/supervisord.d/laravel-worker.conf
+sudo nano /etc/supervisord.d/refresh-worker.conf
+sudo nano /etc/supervisord.d/download-worker.conf
+
+#run this command after update to the worker file
+sudo supervisorctl reread && sudo supervisorctl update
+
+#execute this command after making changes to the code inside jobs
+sudo supervisorctl restart all
+
+sudo supervisorctl stop all && php /home/caroline/public_html/artisan optimize:clear && supervisorctl start all
+
+#OR use below to manually stop specific workers
+
+sudo supervisorctl stop laravel-worker:* && sudo supervisorctl stop refresh-worker:* && php /home/caroline/public_html/artisan optimize:clear && sudo supervisorctl start laravel-worker:* && sudo supervisorctl start refresh-worker:*
+

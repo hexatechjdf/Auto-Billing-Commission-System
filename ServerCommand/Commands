@@ -1,0 +1,34 @@
+ ls
+    2  sudo dnf update -y
+    3  sudo dnf install -y epel-release
+    4  sudo dnf install -y supervisor
+    5  sudo systemctl enable supervisord
+    6  sudo systemctl start supervisord
+    7  sudo nano /etc/supervisord.d/laravel-worker.conf
+    8  sudo dnf nano
+    9  sudo dnf install nano
+   10  sudo nano /etc/supervisord.d/laravel-worker.conf
+   11  sudo supervisorctl reread
+   12  sudo supervisorctl update
+   13  sudo supervisorctl status laravel-worker:*
+   14  sudo supervisorctl start laravel-worker:*
+   15  sudo nano /etc/supervisord.d/laravel-worker.conf
+   16  sudo supervisorctl reread
+   17  sudo supervisorctl status
+   18  sudo supervisorctl status
+   19  sudo tail -f /var/log/supervisord.log
+   20  sudo systemctl status supervisord
+   21  sudo nano /etc/supervisord.d/laravel-worker.conf
+   22  sudo supervisorctl reread
+   23  sudo systemctl enable supervisord
+   24  sudo nano /etc/supervisord.d/laravel-worker.conf
+   25  sudo nano /etc/supervisord.d/refresh-worker.conf
+   26  sudo supervisorctl reread
+   27  sudo nano /etc/supervisord.conf
+   28  sudo supervisorctl restart
+   29  sudo supervisorctl reread
+   30  sudo supervisorctl update
+   31  sudo supervisorctl start laravel-worker:*
+   32  sudo supervisorctl start refresh-worker:*
+   33  sudo supervisorctl stop laravel-worker:* && sudo supervisorctl stop refresh-worker:* && php /home/caroline/public_html/artisan optimize:clear && sudo supervisorctl start laravel-worker:* && sudo supervisorctl start refresh-worker:*
+   34  sudo systemctl status supervisord

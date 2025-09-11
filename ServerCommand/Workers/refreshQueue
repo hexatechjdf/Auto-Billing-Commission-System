@@ -1,0 +1,10 @@
+[program:refresh-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /home/caroline/public_html/artisan queue:work --queue="refresh_token" --sleep=2 --tries=1
+autostart=true
+autorestart=true
+user=caroline
+numprocs=3
+redirect_stderr=true
+stdout_logfile=/home/caroline/public_html/storage/logs/refresh-worker.log
+stopwaitsecs=3600

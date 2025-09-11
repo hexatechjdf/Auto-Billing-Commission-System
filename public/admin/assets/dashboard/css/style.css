@@ -1,0 +1,172 @@
+:root {
+    --primary-color: #1a3a68;
+    --warning-color: #ecb917;
+    --secondary-color: #8f9bad;
+    --danger-dark-color: #842029;
+    --danger-light-color: #f8d7da;
+    --light-back-view: rgba(0, 0, 0, 0.6);
+}
+
+.navbar {
+    top: 0px;
+}
+
+.ptc-100 {
+    padding-top: 100px;
+}
+
+.pbc-50 {
+    padding-bottom: 50px;
+}
+
+.cross_btn {
+    top: -5px;
+    left: 0px;
+    padding: 4px;
+    line-height: 0.5 !important;
+}
+
+.modal-body {
+    overflow-y: auto;
+    max-height: calc(100vh - 150px);
+}
+
+.alert-danger {
+    color: var(--danger-dark-color);
+    background-color: var(--danger-light-color);
+    border-color: var(--danger-light-color);
+}
+
+.custom_alert {
+    color: var(--danger-dark-color);
+    background-color: var(--danger-light-color);
+    border-color: var(--danger-light-color);
+    position: relative;
+    padding: 1rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+}
+
+.hide {
+    display: none;
+}
+
+#loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--light-back-view);
+    /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* Ensure it appears on top */
+}
+
+/* Initially hide the overlay */
+#loader-overlay.hidden {
+    display: none;
+}
+
+.demo_video_link {
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.false_response_json {
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+.btn-secondary {
+    color: #fff;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+.btn-warning {
+    color: #000;
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.card-header {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.payoff_area .payoff-date {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.payoff_area .amount {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.payoff_area .details {
+    padding: 10px;
+}
+
+.payoff_area .details p {
+    margin-bottom: 0;
+}
+
+.swal2-styled.swal2-confirm {
+    border: 0;
+    border-right-color: currentcolor;
+    border-left-color: currentcolor;
+    border-radius: 0.25em;
+    background: initial;
+    background-color: initial;
+    background-color: var(--primary-color) !important;
+    color: #fff;
+    font-size: 1.0625em;
+}
+
+.swal2-icon.swal2-warning {
+    border-color: var(--warning-color);
+    color: var(--warning-color);
+}
+
+.swal2-styled:focus {
+    box-shadow: 0 0 0 1px var(--primary-color) !important;
+}
+
+.loader_btn {
+    font-size: 30px;
+    color: white;
+}
+
+.alert-primary {
+    color: white;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
