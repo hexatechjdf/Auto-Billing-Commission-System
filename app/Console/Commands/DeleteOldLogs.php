@@ -11,15 +11,15 @@ class DeleteOldLogs extends Command
 
     public function handle()
     {
-        try {
-            $cutoffDate   = subDays(10);
-            $deletedCount = LogModel::where('created_at', '<', $cutoffDate)->delete();
+        // try {
+        //     $cutoffDate   = subDays(10);
+        //     $deletedCount = LogModel::where('created_at', '<', $cutoffDate)->delete();
 
-            $this->info("Deleted {$deletedCount} logs older than 10 days.");
-            // Log::info("Deleted {$deletedCount} logs older than 10 days.");
-        } catch (\Exception $e) {
-            $this->error("Failed to delete old logs: " . $e->getMessage());
-            // Log::error("Failed to delete old logs: " . $e->getMessage());
-        }
+        //     $this->info("Deleted {$deletedCount} logs older than 10 days.");
+        //     // Log::info("Deleted {$deletedCount} logs older than 10 days.");
+        // } catch (\Exception $e) {
+        //     $this->error("Failed to delete old logs: " . $e->getMessage());
+        //     // Log::error("Failed to delete old logs: " . $e->getMessage());
+        // }
     }
 }

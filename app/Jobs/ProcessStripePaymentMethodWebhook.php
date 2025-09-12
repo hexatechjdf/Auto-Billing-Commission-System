@@ -41,7 +41,7 @@ class ProcessStripePaymentMethodWebhook implements ShouldQueue
                 $customerId      = $this->payload['data']['previous_attributes']['customer'] ?? null;
                 $paymentMethodId = $dataObject['id'] ?? null;
 
-                // TODO: when detached trigger the job with 1 hour delay. then in the job check if still stripe_customer_id = null  then call the GHL's API "subaccount pause" in a separete background job (with param forcePause= true/false (default false) because if forcePaused then we don't need to check the stripe_cusomer_id = null, if forcePaused = false then stripe_cusomer_id should must be null).
+                // TODO: (If need) when detached trigger the job with 1 hour delay. then in the job check if still stripe_customer_id = null  then call the GHL's API "subaccount pause" in a separete background job (with param forcePause= true/false (default false) because if forcePaused then we don't need to check the stripe_cusomer_id = null, if forcePaused = false then stripe_cusomer_id should must be null).
                 $stripeData = [
                     'stripe_customer_id'       => null,
                     'stripe_payment_method_id' => $paymentMethodId,

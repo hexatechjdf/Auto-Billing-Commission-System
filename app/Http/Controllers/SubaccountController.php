@@ -21,7 +21,7 @@ class SubaccountController extends Controller
 
     public function index()
     {
-        $isAgencyConnected = isAgencyConnected(); // Assuming this helper exists
+        $isAgencyConnected = isAgencyConnected();
         return view('admin.subaccounts', compact('isAgencyConnected'));
     }
 
@@ -105,9 +105,8 @@ class SubaccountController extends Controller
                     ], 500);
                 }
 
-                Log::info('response Subaccount ', ['subaccounts' => $subaccounts]);
-
                 foreach ($subaccounts as $subaccount) {
+
                     if ($subaccount->already_exist) {
                         //Log::info('Subaccount already exists', ['location_id' => $subaccount->id]);
                         continue;
@@ -224,6 +223,34 @@ class SubaccountController extends Controller
         }
     }
 
+    public function editSubaccount(int $id): JsonResponse
+    {
+        try {
+            $subaccount = UserSetting::find($id);
+
+            if (! $subaccount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Subaccount not found',
+                    'data'    => [],
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data'    => $subaccount,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Failed to fetch subaccount', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch subaccount: ' . $e->getMessage(),
+                'data'    => [],
+            ], 500);
+        }
+    }
+
     public function updateSubaccount(Request $request): JsonResponse
     {
         try {
@@ -233,43 +260,30 @@ class SubaccountController extends Controller
                 'paused'          => filter_var($request->paused, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
             ]);
 
-            $request->validate([
-                'id'                       => 'required|exists:user_settings,id',
-                'chargeable'               => 'required|boolean',
-                'allow_uninstall'          => 'required|boolean',
-                'amount_charge_percent'    => 'required|numeric|min:0|max:100',
-                'threshold_amount'         => 'required|numeric|min:0',
-                'currency'                 => 'required|string|size:3',
-                'paused'                   => 'required|boolean',
-                'stripe_payment_method_id' => 'required|string',
-                'stripe_customer_id'       => 'required|string',
-                'contact_id'               => 'required|string',
-                'contact_phone'            => 'required|string',
-                'location_name'            => 'required|string',
-
+            $validated = $request->validate([
+                'id'                       => ['required', 'exists:user_settings,id'],
+                'chargeable'               => ['required', 'boolean'],
+                'allow_uninstall'          => ['required', 'boolean'],
+                'amount_charge_percent'    => ['required', 'numeric', 'between:0,100'],
+                'threshold_amount'         => ['required', 'numeric', 'min:0'],
+                'currency'                 => ['required', 'string', 'size:3'],
+                'paused'                   => ['required', 'boolean'],
+                'stripe_payment_method_id' => ['required', 'string'],
+                'stripe_customer_id'       => ['required', 'string'],
+                'contact_id'               => ['required', 'string'],
+                'contact_phone'            => ['required', 'string'],
+                'location_name'            => ['required', 'string'],
             ]);
 
-            $userSetting = UserSetting::findOrFail($request->id);
-            $userSetting->update([
-                'chargeable'               => $request->chargeable,
-                'allow_uninstall'          => $request->allow_uninstall,
-                'amount_charge_percent'    => $request->amount_charge_percent,
-                'threshold_amount'         => $request->threshold_amount,
-                'currency'                 => $request->currency,
-                'paused'                   => $request->paused,
-                'contact_id'               => $request->contact_id,
-                'contact_phone'            => $request->contact_phone
-                ,
-                'location_name'            => $request->location_name,
-
-                'stripe_payment_method_id' => $request->stripe_payment_method_id,
-                'stripe_customer_id'       => $request->stripe_customer_id,
-            ]);
+            $userSetting = UserSetting::findOrFail($validated['id']);
+            $userSetting->update($validated);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Subaccount updated successfully',
                 'data'    => $userSetting,
+                //'data' => $userSetting->fresh(), // return updated record
+
             ]);
         } catch (\Exception $e) {
             return response()->json([

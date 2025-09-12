@@ -53,28 +53,15 @@ Route::group(['middleware' => ['auth']], function () { // middleware ['auth','is
             // Dashboard
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-            // Subaccounts
-            // Route::get('/subaccounts', [AdminController::class, 'subaccounts'])->name('subaccounts');
-            // Route::get('/subaccounts/data', [AdminController::class, 'subaccountsData'])->name('subaccounts.data');
-            // Route::put('/subaccounts/update', [AdminController::class, 'updateSubaccount'])->name('subaccounts.update');
-
             Route::get('/subaccounts', [SubaccountController::class, 'index'])->name('subaccounts');
             Route::get('/subaccounts/data', [SubaccountController::class, 'subaccountsData'])->name('subaccounts.data');
+            Route::get('/subaccounts/{id}/edit', [SubaccountController::class, 'editSubaccount'])->name('subaccounts.edit');
             Route::put('/subaccounts/update', [SubaccountController::class, 'updateSubaccount'])->name('subaccounts.update');
             Route::put('/subaccounts/toggle', [SubaccountController::class, 'toggleSubaccount'])->name('subaccounts.toggle');
 
             Route::post('/subaccounts/sync', [SubaccountController::class, 'syncSubaccounts'])->name('subaccounts.sync');
             Route::get('/subaccounts/plan-mappings', [SubaccountController::class, 'getPlanMappings'])->name('subaccounts.plan_mappings');
             Route::post('/subaccounts/assign-plans', [SubaccountController::class, 'assignPlans'])->name('subaccounts.assign_plans');
-
-            // Plan Mappings
-            // Route::get('/plan-mappings', [AdminController::class, 'planMappings'])->name('plan-mappings');
-
-            // Transactions
-            Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
-
-            // Orders
-            // Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
 
             // Settings
             Route::get('/settings', [SettingController::class, 'index'])->name('settings');

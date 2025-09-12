@@ -6,6 +6,7 @@ use App\Helper\CRM;
 //  use App\Jobs\{ProcessGhlLocationWebhook, ProcessGhlOrderStatusUpdate, ProcessPrimaryOrderJob, ProcessStripeWebhook};
 
 use App\Jobs\ConnectSubaccountJob;
+use App\Jobs\PauseSubaccountJob;
 use App\Jobs\ProcessGhlLocationWebhook;
 use App\Jobs\ProcessGhlOrderStatusUpdate;
 use App\Jobs\ProcessPrimaryOrderJob;
@@ -26,7 +27,7 @@ class WebhookController extends Controller
             'INSTALL'           => $this->handleGhlLocationConnectWebhook($payload, $log),
             'UNINSTALL'         => $this->handleGhlAppUninsalllWebhook($payload, $log),
             'LocationCreate', 'LocationUpdate' => $this->handleGhlLocationWebhook($webhookType, $payload, $log),
-            // 'PriceCreate'       => $this->handleGhlPriceCreate($webhookType, $payload, $log), //TODO: test it
+            // 'PriceCreate'       => $this->handlePriceCreate($webhookType, $payload, $log), //TODO: test it
             'OrderStatusUpdate' => $this->handleGhlOrderStatusUpdate($webhookType, $payload, $log),
             'InvoicePaid', 'invoice.paid'      => $this->handleGhlInvoicePaid($webhookType, $payload, $log),
             default             => response()->json(['message' => 'Unhandled webhook type'], 200),
@@ -41,15 +42,6 @@ class WebhookController extends Controller
             Log::error('Missing location ID in GHL webhook', $log);
             return response()->json(['success' => false, 'message' => 'Missing location ID'], 200);
         }
-
-        //TOOD: add the appId Check before processing to make sure webhhok is based on our Marketplace App.
-
-        $appId = $payload['appId'] ?? null;
-
-        // if ($appId != 'BillingSystem appId') {
-        //     Log::error('Missing location ID in GHL webhook', $log);
-        //     return response()->json(['success' => false, 'message' => 'appId Other then Auto-Billing-System, Skiped'], 200);
-        // }
 
         $subaccount = UserSetting::where('location_id', $locationId)
             ->select('allow_uninstall', 'user_id')
@@ -104,35 +96,36 @@ class WebhookController extends Controller
         return response()->json(['success' => true, 'message' => 'Webhook queued for processing']);
     }
 
-    public function handlePriceCreate(Request $request) // TODO : test it
-    {
-        $payload = $request->all();
+    // public function handlePriceCreate(Request $request) // TODO : test it
+    // {
+    //     $payload = $request->all();
 
-        $locationId = $payload['locationId'] ?? null;
-        $priceId    = $payload['_id'] ?? null;
+    //     $locationId = $payload['locationId'] ?? null;
+    //     $priceId    = $payload['_id'] ?? null;
 
-        if (! $locationId || ! $priceId) {
-            return response()->json(['success' => false, 'message' => 'Invalid payload'], 200); //TODO confirm the status code to return
-        }
+    //     if (! $locationId || ! $priceId) {
+    //         return response()->json(['success' => false, 'message' => 'Invalid payload'], 200); //TODO confirm the status code to return
+    //     }
 
-        $response = CRM::fetchInventories($locationId);
+    //     $planMappingService = app(PlanMappingService::class);
 
-        if (! $response['status']) {
-            return response()->json(['success' => false, 'message' => $response['message']], 400);
-        }
+    //     $response = $planMappingService->fetchInventories($locationId);
 
-        $inventories = $response['inventories'];
-        $newPrice    = collect($inventories)->firstWhere('_id', $priceId);
+    //     if (! $response['status']) {
+    //         return response()->json(['success' => false, 'message' => $response['message']], 400);
+    //     }
 
-        if (! $newPrice) {
-            return response()->json(['success' => false, 'message' => 'New price not found'], 404);
-        }
+    //     $inventories = $response['inventories'];
+    //     $newPrice    = collect($inventories)->firstWhere('_id', $priceId);
 
-        $planMappingService = app(PlanMappingService::class);
-        $planMappingService->syncPlanMappingsForLocation($locationId, [$newPrice]);
+    //     if (! $newPrice) {
+    //         return response()->json(['success' => false, 'message' => 'New price not found'], 404);
+    //     }
 
-        return response()->json(['success' => true, 'message' => 'New price synced successfully']);
-    }
+    //     $planMappingService->syncPlanMappingsForLocation($locationId, [$newPrice]);
+
+    //     return response()->json(['success' => true, 'message' => 'New price synced successfully']);
+    // }
 
     protected function handleGhlOrderStatusUpdate(string $webhookType, array $payload, array $log)
     { // TODO: optimize
@@ -191,7 +184,7 @@ class WebhookController extends Controller
 
         $transactionsQuery = Transaction::where('invoice_id', $invoiceId);
 
-        $transaction = $transactionsQuery->first();
+        $transaction = $transactionsQuery->clone()->first();
 
         if (! $transaction) {
             Log::warning('No transactions found for invoice_id', ['invoice_id' => $invoiceId]);
@@ -205,7 +198,11 @@ class WebhookController extends Controller
             $userSetting = $transaction->userSetting();
 
             if ($userSetting) {
-                //TODO: not sure but I think if $userSetting->paused  then (when invoice paid ) we also need to call GHL api to locationActive
+
+                if ($userSetting->paused) {
+                    PauseSubaccountJob::dispatch($userSetting, false);
+                }
+
                 $userSetting->update(['pause_at' => null, 'paused' => 0]);
                 Log::info('Updated subaccount on CRM invoice paid', ['invoice_id' => $invoiceId]);
             } else {

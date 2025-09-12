@@ -140,7 +140,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Contact phone</label>
-                            <input type="text" id="edit-contact-phone" class="form-control">
+                            <input type="text" id="edit-contact-phone" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label for="edit-chargeable" class="form-label">Chargeable</label>
@@ -178,20 +178,21 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Stripe Payment Method ID</label>
-                            <input type="text" id="edit-stripe-payment-method-id" class="form-control">
+                            <input type="text" id="edit-stripe-payment-method-id" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Stripe Customer ID</label>
-                            <input type="text" id="edit-stripe-customer-id" class="form-control">
+                            <input type="text" id="edit-stripe-customer-id" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Contact Id</label>
-                            <input type="text" id="edit-contact-id" class="form-control">
+                            <input type="text" id="edit-contact-id" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Location Name</label>
-                            <input type="text" id="edit-location-name" class="form-control">
+                            <input type="text" id="edit-location-name" class="form-control" required>
                         </div>
+                        {{--
                         <div class="mb-3">
                             <label for="edit-paused" class="form-label">Status</label>
                             <select id="edit-paused" class="form-control" required>
@@ -199,6 +200,7 @@
                                 <option value="1">Paused</option>
                             </select>
                         </div>
+                        --}}
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -503,17 +505,15 @@
 
         function editSubaccount(id) {
             $.ajax({
-                url: '{{ route('admin.subaccounts.data') }}',
+                url: '{{ route('admin.subaccounts.edit', ':id') }}'.replace(':id', id),
                 method: 'GET',
-                data: {
-                    id: id
-                },
                 success: function(response) {
-                    const subaccount = response.data[0];
+                    const subaccount = response.data;
                     if (!subaccount) {
                         toastr.error('Subaccount not found');
                         return;
                     }
+
                     $('#edit-subaccount-id').val(subaccount.id);
                     $('#edit-location-id').val(subaccount.location_id);
                     $('#edit-email').val(subaccount.email || '');
@@ -525,16 +525,10 @@
                     $('#edit-stripe-payment-method-id').val(subaccount.stripe_payment_method_id || '');
                     $('#edit-stripe-customer-id').val(subaccount.stripe_customer_id || '');
 
-
                     $('#edit-contact-id').val(subaccount.contact_id || '');
                     $('#edit-contact-phone').val(subaccount.contact_phone || '');
                     $('#edit-location-name').val(subaccount.location_name || '');
-
-                    $('#edit-paused').val(subaccount.paused ? '1' : '0');
-
-
-
-                    $('#edit-paused').val(subaccount.paused ? '1' : '0');
+                    // $('#edit-paused').val(subaccount.paused ? '1' : '0');
 
                     const modal = new bootstrap.Modal(document.getElementById('editSubaccountModal'));
                     modal.show();
@@ -545,6 +539,7 @@
                 }
             });
         }
+
 
         function saveSubaccount() {
             const btn = event.target;
@@ -565,10 +560,14 @@
                 location_name: $('#edit-location-name').val(),
 
 
-                paused: $('#edit-paused').val() === '1' ? 1 : 0,
+                //paused: $('#edit-paused').val() === '1' ? 1 : 0,
             };
 
-            if (!data.amount_charge_percent || !data.threshold_amount || !data.currency) {
+            if (!data.amount_charge_percent || !data.threshold_amount || !data.currency ||
+                !data.stripe_payment_method_id || !data.stripe_customer_id || !data.location_name ||
+                !data.location_name ||
+                !data.contact_id || !data.contact_phone
+            ) {
                 toastr.warning('Please fill in all required fields.');
                 hideLoading(btn);
                 return;

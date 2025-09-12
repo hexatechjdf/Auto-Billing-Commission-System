@@ -1,6 +1,9 @@
 <?php
 namespace App\Console\Commands;
 
+use App\Jobs\PauseSubaccountJob;
+use App\Models\UserSetting;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class PauseSubaccountsCommand extends Command

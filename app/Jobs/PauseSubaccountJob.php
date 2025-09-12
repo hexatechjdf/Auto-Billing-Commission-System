@@ -2,6 +2,7 @@
 namespace App\Jobs;
 
 use App\Helper\CRM;
+use App\Models\UserSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,7 +16,7 @@ class PauseSubaccountJob implements ShouldQueue
 
     protected $subaccount;
 
-    public function __construct(UserSetting $subaccount, $forcePause = false) // TODO: manage force paused param
+    public function __construct(UserSetting $subaccount, protected $paused = true) // TODO: manage force paused param
     {
         $this->subaccount = $subaccount;
     }
@@ -23,17 +24,27 @@ class PauseSubaccountJob implements ShouldQueue
     public function handle()
     {
         $subaccount = $this->subaccount;
+        $paused     = $this->paused;
 
         $locationId = $subaccount->location_id;
         $userId     = $subaccount->user_id;
 
-        $response = CRM::crmV2Loc($userId, $locationId, 'saas-api/public-api/pause/' . $locationId, 'POST');
+        $companyId = CRM::getCrmToken(['location_id' => $locationId])?->company_id;
 
-        if (isset($response->success)) { //TODO confirm this condition based on response
-            // $subaccount->paused = 1;
-            // $subaccount->save();
+        $companyToken = CRM::getCrmToken([
+            'company_id' => $this->companyId,
+            'user_type'  => CRM::$lang_com,
+        ]);
 
-            $subaccount->update(['paused' => 1]);
+        $data = ['paused' => $paused, 'companyId' => $companyId];
+
+        // saas-api/public-api/pause/
+
+        $response = CRM::agencyV2($companyToken->user_id, 'saas/pause/' . $locationId, 'POST', $data, [], true, $companyToken);
+
+        if (isset($response->message) && $response->message == 'success') {
+
+            $subaccount->update(['paused' => $paused]);
 
             Log::info('Subaccount paused successfully', ['locationId' => $locationId]);
         } else {

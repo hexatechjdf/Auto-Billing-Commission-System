@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Helper\CRM;
 use App\Repositories\PlanMappingRepository;
 
 class PlanMappingService
@@ -115,139 +116,71 @@ class PlanMappingService
         }
     }
 
-    // public function fetchInventories($locationId, $request = [])
-    // {
-    //     $user  = auth()->user();
-    //     $token = $user->token ?? null;
+    public function fetchInventories($locationId, $request = [])
+    {
+                                 //Important TODO:
+        $user  = auth()->user(); // TODO: get the admin user instead of login user (if also used in job) or pass user fonm job
+        $token = $user->token ?? null;
 
-    //     // Default response structure
-    //     $response = [
-    //         'status'      => false,
-    //         'message'     => 'Connect to Agency First',
-    //         'inventories' => '',
-    //         'loadMore'    => false,
-    //         'type'        => $token->user_type ?? '',
-    //     ];
+        // Default response structure
+        $response = [
+            'status'      => false,
+            'message'     => 'Connect to Agency First',
+            'inventories' => [],
+            'loadMore'    => false,
+            'type'        => $token->user_type ?? null,
+        ];
 
-    //     if (! $token) {
-    //         return $response;
-    //     }
+        // If no token, return default response immediately
+        if (! $token) {
+            return $response;
+        }
 
-    //     // Early exit if user type is invalid
-    //     if ($token->user_type !== CRM::$lang_com) {
-    //         return $response;
-    //     }
+        $type   = $token->user_type;
+        $limit  = 100;
+        $offset = (int) ($request['offset'] ?? 0);
 
-    //     // Pagination
-    //     $limit  = 100;
-    //     $offset = $request->offset ?? 0;
-    //     if ($offset < 0) {
-    //         $offset = 0;
-    //     }
+        // If user type is not allowed, return early
+        if ($type !== CRM::$lang_com) {
+            $response['type'] = $type;
+            return $response;
+        }
 
-    //     // Build query
-    //     $query = sprintf(
-    //         'products/inventory?altId=%s&altType=location&limit=%d&offset=%d',
-    //         $locationId,
-    //         $limit,
-    //         $offset
-    //     );
+        // Build API query
+        $query = sprintf(
+            'products/inventory?altId=%s&altType=location&limit=%d&offset=%d',
+            $locationId,
+            $limit,
+            $offset
+        );
 
-    //     // Fetch details from agencyV2 API
-    //     $detail = CRM::agencyV2($user->id, $query, 'get', '', [], false, $token);
+        // Call API (may throw exception → handled in controller)
+        $apiResponse = CRM::agencyV2($user->id, $query, 'get', '', [], false, $token);
 
-    //     // If response is valid and inventory exists
-    //     if ($detail && property_exists($detail, 'inventory')) {
-    //         $response['inventories'] = $detail->inventory;
-    //         $response['status']      = true;
-    //         $response['loadMore']    = count($detail->inventory) >= $limit;
+        // If API returned an error
+        if (! $apiResponse || isset($apiResponse->error)) {
+            $errorMsg = data_get($apiResponse, 'error.message', 'Unable to fetch inventory');
+            Log::error("Inventory API Error", [
+                'locationId' => $locationId,
+                'error'      => $errorMsg,
+            ]);
+            $response['message'] = $errorMsg;
+            return $response;
+        }
 
-    //         //TODO: add already exist flage
-    //         // $ids       = collect($detail)->pluck('id')->toArray();
-    //         // $exist_tokens = static::$crm::pluck('location_id')->toArray();
-    //         // foreach ($detail as $det) {
-    //         //     $det->already_exist = in_array($det->id, $exist_tokens);
-    //         // }
-    //     }
-    //     else{
+        // If inventory exists in response
+        if (! empty($apiResponse->inventory)) {
+            $inventoryData           = $apiResponse->inventory;
+            $response['status']      = true;
+            $response['inventories'] = $inventoryData;
+            $response['loadMore']    = count($inventoryData) >= $limit;
+            $response['message']     = 'Inventories fetched successfully';
+            //TODO: add already exist flage
+        } else {
+            // No inventory found
+            $response['message'] = 'No inventory found for this location';
+        }
 
-    //     }
-
-    //     return $response;
-    // }
-
-    // public function fetchInventories($locationId, $request = null)
-    // {
-    //     $user  = auth()->user();
-    //     $token = $user->token ?? null;
-
-    //     // Default response structure
-    //     $response = [
-    //         'status'   => false,
-    //         'message'  => 'Connect to Agency First',
-    //         'detail'   => [],
-    //         'loadMore' => false,
-    //         'type'     => $token->user_type ?? null,
-    //     ];
-
-    //     // If no token, return default response immediately
-    //     if (! $token) {
-    //         return $response;
-    //     }
-
-    //     $type   = $token->user_type;
-    //     $limit  = 100;
-    //     $offset = (int) ($request->offset ?? 0);
-
-    //     // If user type is not allowed, return early
-    //     if ($type !== self::$lang_com) {
-    //         $response['type'] = $type;
-    //         return $response;
-    //     }
-
-    //     // Build query
-    //     $query = sprintf(
-    //         'products/inventory?altId=%s&altType=location&limit=%d&offset=%d',
-    //         $locationId,
-    //         $limit,
-    //         $offset
-    //     );
-
-    //     try {
-    //         // Call API
-    //         $apiResponse = self::agencyV2($user->id, $query, 'get', '', [], false, $token);
-
-    //         // If API returned an error
-    //         if (! $apiResponse || isset($apiResponse->error)) {
-    //             $errorMsg = data_get($apiResponse, 'error.message', 'Unable to fetch inventory');
-    //             Log::error("Inventory API Error", [
-    //                 'locationId' => $locationId,
-    //                 'error'      => $errorMsg,
-    //             ]);
-    //             $response['message'] = $errorMsg;
-    //             return $response;
-    //         }
-
-    //         // If inventory exists in response
-    //         if (! empty($apiResponse->inventory)) {
-    //             $inventoryData        = $apiResponse->inventory;
-    //             $response['status']   = true;
-    //             $response['detail']   = $inventoryData;
-    //             $response['loadMore'] = count($inventoryData) >= $limit;
-    //             $response['message']  = 'Inventories fetched successfully';
-    //         } else {
-    //             // No inventory found
-    //             $response['message'] = 'No inventory found for this location';
-    //         }
-    //     } catch (\Throwable $e) {
-    //         // Catch unexpected errors
-    //         Log::error("Inventory Fetch Exception", [
-    //             'locationId' => $locationId,
-    //             'error'      => $e->getMessage(),
-    //         ]);
-    //         $response['message'] = 'Something went wrong while fetching inventories';
-    //     }
-
-    //     return $response;
-    // }
+        return $response;
+    }
 }

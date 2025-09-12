@@ -1,7 +1,6 @@
 <?php
 namespace App\Jobs;
 
-use App\Helper\CRM;
 use App\Services\PlanMappingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,14 +21,16 @@ class SyncGhlPricesJob implements ShouldQueue
             return;
         }
 
-        $response = CRM::fetchInventories($primarySubaccount); // TODO: get the admin user in fetchInventories instead of login user
+        $planMappingService = app(PlanMappingService::class);
+
+        $response = $planMappingService->fetchInventories($primarySubaccount); // TODO: if used this job get the admin user in fetchInventories instead of login user
         if (! $response['status']) {
             $this->error("Failed to sync for primary subaccount $primarySubaccount: " . $response['message']);
             return;
         }
 
-        $inventories        = $response['inventories'];
-        $planMappingService = app(PlanMappingService::class);
+        $inventories = $response['inventories'];
+
         $planMappingService->syncPlanMappingsForLocation($primarySubaccount, $inventories);
 
         $this->info("Synced prices for primary subaccount: $primarySubaccount");

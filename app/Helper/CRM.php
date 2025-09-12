@@ -5,7 +5,6 @@ use App\Helper\gCache;
 use App\Models\CrmToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class CRM
@@ -866,119 +865,6 @@ class CRM
         }
         return [$status, $message, $detail, $load_more];
         // return response()->json(['status' => $status, 'message' => $message, 'type' => $type, 'detail' => $detail, 'loadMore' => $load_more]);
-    }
-
-    // public static function fetchInventories($locationId, Request $request = null)
-    // {
-    //     $user      = auth()->user();
-    //     $token     = $user->token ?? null;
-    //     $status    = false;
-    //     $message   = 'Connect to Agency First';
-    //     $type      = '';
-    //     $detail    = '';
-    //     $load_more = false;
-
-    //     if ($token) {
-    //         $type   = $token->user_type;
-    //         $limit  = 100;
-    //         $offset = 0;
-
-    //         if ($request->has('offset')) {
-    //             if ($request->offset >= 1) {
-    //                 $offset = $request->offset;
-    //             }
-    //         }
-
-    //         $query = 'products/inventory?&altId=' . $locationId . '&altType=location' . '&limit=' . $limit . '&offset=' . $offset;
-
-    //         if ($type !== self::$lang_com) {
-    //             return response()->json(['status' => $status, 'message' => $message, 'type' => $type, 'detail' => $detail, 'loadMore' => $load_more]);
-    //         } else {
-    //             $detail = self::agencyV2($user->id, $query, 'get', '', [], false, $token);
-    //         }
-
-    //         if ($detail && property_exists($detail, 'inventory')) {
-
-    //             $detail    = $detail->inventory;
-    //             $load_more = count($detail) > $limit - 1;
-    //             $ids       = collect($detail)->pluck('id')->toArray();
-    //             // $exist_tokens = static::$crm::pluck('location_id')->toArray();
-    //             // foreach ($detail as $det) {
-    //             //     $det->already_exist = in_array($det->id, $exist_tokens);
-    //             // }
-    //             $status = true;
-    //         }
-    //     }
-
-    //     return [$status, $message, $detail, $load_more];
-    // }
-
-    public static function fetchInventories($locationId, $request = [])
-    {
-                                 //Important TODO:
-        $user  = auth()->user(); // TODO: get the admin user instead of login user (because using in job) or pass user fonm job
-        $token = $user->token ?? null;
-
-        // Default response structure
-        $response = [
-            'status'      => false,
-            'message'     => 'Connect to Agency First',
-            'inventories' => [],
-            'loadMore'    => false,
-            'type'        => $token->user_type ?? null,
-        ];
-
-        // If no token, return default response immediately
-        if (! $token) {
-            return $response;
-        }
-
-        $type   = $token->user_type;
-        $limit  = 100;
-        $offset = (int) ($request['offset'] ?? 0);
-
-        // If user type is not allowed, return early
-        if ($type !== self::$lang_com) {
-            $response['type'] = $type;
-            return $response;
-        }
-
-        // Build API query
-        $query = sprintf(
-            'products/inventory?altId=%s&altType=location&limit=%d&offset=%d',
-            $locationId,
-            $limit,
-            $offset
-        );
-
-        // Call API (may throw exception → handled in controller)
-        $apiResponse = self::agencyV2($user->id, $query, 'get', '', [], false, $token);
-
-        // If API returned an error
-        if (! $apiResponse || isset($apiResponse->error)) {
-            $errorMsg = data_get($apiResponse, 'error.message', 'Unable to fetch inventory');
-            Log::error("Inventory API Error", [
-                'locationId' => $locationId,
-                'error'      => $errorMsg,
-            ]);
-            $response['message'] = $errorMsg;
-            return $response;
-        }
-
-        // If inventory exists in response
-        if (! empty($apiResponse->inventory)) {
-            $inventoryData           = $apiResponse->inventory;
-            $response['status']      = true;
-            $response['inventories'] = $inventoryData;
-            $response['loadMore']    = count($inventoryData) >= $limit;
-            $response['message']     = 'Inventories fetched successfully';
-            //TODO: add already exist flage
-        } else {
-            // No inventory found
-            $response['message'] = 'No inventory found for this location';
-        }
-
-        return $response;
     }
 
     public static function authChecking($req)

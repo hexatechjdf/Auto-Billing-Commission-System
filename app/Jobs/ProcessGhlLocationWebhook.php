@@ -88,7 +88,8 @@ class ProcessGhlLocationWebhook implements ShouldQueue
             return;
         }
 
-                                                                                            //  Handle Location Update (only if email was missing before)
+
+        //  Handle Location Update (only if email was missing before)
         if ($type === 'LocationUpdate' && $email && $userSetting && ! $userSetting->email) { //TODO
             $userSetting->update(
                 $this->prepareUserSettingData($dbUserId, $locationId, $email, $subaccountCachedData)

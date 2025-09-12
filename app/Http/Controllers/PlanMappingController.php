@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Helper\CRM;
 use App\Services\PlanMappingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -97,7 +96,7 @@ class PlanMappingController extends Controller
             // Fetch latest products and prices from GHL
             // $products = $this->fetchProductsFromGHL($locationId);
 
-            $response = CRM::fetchInventories($locationId);
+            $response = $this->planMappingService->fetchInventories($locationId);
 
             if (! isset($response['status']) || $response['status'] === false) {
                 throw new \Exception($response['message'] ?? 'Failed to fetch inventories');

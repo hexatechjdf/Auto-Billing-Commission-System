@@ -18,7 +18,7 @@ class SyncGhlSubaccountJob implements ShouldQueue
 
     // protected $location;
 
-    public function __construct(protect $location)
+    public function __construct(protected $location)
     {
         // $this->location = $location;
     }
@@ -50,7 +50,7 @@ class SyncGhlSubaccountJob implements ShouldQueue
             // \gCache::del('loc_iH97EKkQZYraKdjvKRN0');
             // \gCache::del('loc_HuVkfWx59Pv4mUMgGRTp');
 
-            // using CRM::getCrmToken because its handling cache mecanisim
+            // use CRM::getCrmToken because its handling cache mecanisim
             // dd($isNewlyCreated, $dbUserId, CRM::getCrmToken(['location_id' => $locationId]));
 
             if ($isNewlyCreated || ! $locationUserId = CRM::getCrmToken(['location_id' => $locationId])?->user_id) { // check if isNewlyCreated or crmToken not exist for this location then also getLocationAccessToken
@@ -92,12 +92,5 @@ class SyncGhlSubaccountJob implements ShouldQueue
             'threshold_amount' => 0.00,
             'currency'         => 'USD',
         ];
-
-        // 'location_name' => data_get($subaccountData, 'name'),
-        // 'email'         => data_get($subaccountData, 'name'),
-        // 'contact_id'    => data_get($subaccountData, 'contact_id'),
-        // 'contact_name'  => $contactFullName;
-        // 'contact_phone' => data_get($subaccountData, 'phone'),
-
     }
 }

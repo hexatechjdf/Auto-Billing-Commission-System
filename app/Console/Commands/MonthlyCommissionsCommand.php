@@ -11,11 +11,11 @@ class MonthlyCommissionsCommand extends Command
 
     public function handle()
     {
-        if (Carbon::now()->day === 1) {
-            ProcessMonthlyCommissionsJob::dispatch();
-            $this->info('Monthly commissions job dispatched');
-        } else {
-            $this->info('Not the first day of the month, skipping');
-        }
+        // if (Carbon::now()->day === 1) {
+        //     ProcessMonthlyCommissionsJob::dispatch();
+        //     $this->info('Monthly commissions job dispatched');
+        // } else {
+        //     $this->info('Not the first day of the month, skipping');
+        // }
     }
 }

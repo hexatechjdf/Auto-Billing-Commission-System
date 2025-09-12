@@ -11,8 +11,8 @@ class ProcessOrdersCommand extends Command
 
     public function handle(): int
     {
-        ProcessPendingOrdersJob::dispatch();
-        $this->info('Pending orders processing job dispatched successfully.');
+        // ProcessPendingOrdersJob::dispatch();
+        // $this->info('Pending orders processing job dispatched successfully.');
 
         return Command::SUCCESS;
     }
