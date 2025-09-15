@@ -30,11 +30,12 @@ class ProcessPrimaryOrderJob implements ShouldQueue
         $locationId = $this->payload['locationId'] ?? null;
         $contactId  = $this->payload['contactId'] ?? null;
         $email      = data_get($this->payload, 'contactSnapshot.email');
+        $phone      = data_get($this->payload, 'contactSnapshot.phone');
 
-        // -------TODO:also save these in sucaccoint setting (for use in GHLInvoice generation) and also listen the contactUpdate Webhook
-        $firstName = data_get($this->payload, 'contactSnapshot.firstName');
-        $lastName  = data_get($this->payload, 'contactSnapshot.lastName');
-        $phone     = data_get($this->payload, 'contactSnapshot.phone');
+        // -------TODO:also save these in subaccount setting (for use in GHLInvoice generation) and also listen the contactUpdate Webhook
+        $firstName   = data_get($this->payload, 'contactSnapshot.firstName');
+        $lastName    = data_get($this->payload, 'contactSnapshot.lastName');
+        $contactName = $firstName . ' ' . $lastName;
         //-------------------------------------------------------------------------------
 
         // dd('inJOb', $locationId, $contactId, $email);
@@ -82,7 +83,7 @@ class ProcessPrimaryOrderJob implements ShouldQueue
 
         $subaccountData['priceMappingData'] = $priceMappingData;
 
-        $orderData                   = ['contactId' => $contactId];
+        $orderData                   = ['contactId' => $contactId, 'contactPhone' => $phone, 'contactName' => $contactName];
         $subaccountData['orderData'] = $orderData;
 
         // dd($subaccountData);
@@ -99,7 +100,9 @@ class ProcessPrimaryOrderJob implements ShouldQueue
             $updateData = [
                 'stripe_payment_method_id' => $subaccountData['stripeData']['stripe_payment_method_id'] ?? null,
                 'stripe_customer_id'       => $subaccountData['stripeData']['stripe_customer_id'] ?? null,
-                'contact_id'               => $subaccountData['orderData']['contactId'] ?? null,
+                'contact_id'               => $subaccountData['orderData']['contactId'],
+                'contact_phone'            => $subaccountData['orderData']['contactPhone'],
+                'contact_name'             => $subaccountData['orderData']['contactName'] ?? null,
                 'threshold_amount'         => $subaccountData['priceMappingData']['threshold_amount'] ?? null,
                 'currency'                 => $subaccountData['priceMappingData']['currency'] ?? null,
                 'price_id'                 => $subaccountData['priceMappingData']['price_id'] ?? null,

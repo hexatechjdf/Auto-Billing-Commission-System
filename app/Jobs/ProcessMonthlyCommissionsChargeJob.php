@@ -59,8 +59,6 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
             ? $thresholdAmount - $totalCommission
             : 0;
 
-        // dd($thresholdAmount, $totalCommission, $thresholdShortfall);
-
         // Final invoice amount
         $invoiceAmount = $unpaidCommission + $thresholdShortfall;
 
@@ -139,18 +137,19 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
         if ($thresholdShortfall > 0) {
             //insert record to transactions table either with status $stripePaymentSucceeded
 
-            //TODO: confirm this then uncomment
-            // $thresholdTransaction = Transaction::create([    // maybe I think add a column is_threshold = 1 or add created_at with lastMonth date so that its not include in next month calculations
-            //     'location_id'           => $locationId,
-            //     'sum_commission_amount' => $thresholdShortfall, // TODO: maybe need in a separate column for thresholdShortfall amount
-            //     'currency'              => $currency,
-            //     'status'                => 0, // pending
-            //     'metadata'              => ['type' => 'threshold Shortfall Transaction', 'stripe_paymentIntentId' => $stripePaymentId],
-            //     'charged_at'            => null,
-            //     'reason'                => 'Threshold Shortfall Transaction',
-            //     // 'pm_intent' => $stripePaymentId,
-            //     'invoice_id'            => null,
-            // ]);
+                                                          //TODO: confirm this then uncomment
+            $thresholdTransaction = Transaction::create([ // maybe I think add a column is_threshold = 1 or add created_at with lastMonth date so that its not include in next month calculations
+                'location_id'           => $locationId,
+                'sum_commission_amount' => $thresholdShortfall, // TODO: maybe need in a separate column for thresholdShortfall amount
+                'currency'              => $currency,
+                'status'                => 0, // pending
+                'metadata'              => ['type' => 'threshold Shortfall Transaction', 'stripe_paymentIntentId' => $stripePaymentId],
+                'charged_at'            => null,
+                'reason'                => 'Threshold Shortfall Transaction',
+                // 'pm_intent' => $stripePaymentId,
+                'invoice_id'            => null,
+                'created_at'            => $endOfLastMonth,
+            ]);
         }
 
         // 2: If Stripe succeeded, update transactions & subaccount
@@ -158,9 +157,11 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
             $transactionsQuery->clone()
                 ->whereNot('status', Transaction::STATUS_PAID)
                 ->update([
-                    'status'   => 1,
+                    'status'   => Transaction::STATUS_PAID,
                     'metadata' => json_encode(['stripe_paymentIntentId' => $stripePaymentId]),
                 ]);
+
+            $thresholdTransaction->update(['status' => Transaction::STATUS_PAID]);
 
             $subaccount->update([
                 //'pause_at'        => $pauseAtDate,
@@ -187,7 +188,7 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
                 ->whereNot('status', Transaction::STATUS_PAID)
                 ->update(['invoice_id' => $invoiceId]);
 
-            // $thresholdTransaction->update(['invoice_id' => $invoiceId]);
+            $thresholdTransaction->update(['invoice_id' => $invoiceId]);
 
             $subaccount->update([
                 'pause_at'        => $pauseAtDate,
@@ -255,9 +256,12 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
         $userId     = $subaccount->user_id;
         $contactId  = $subaccount->contact_id;
 
-        $contactName  = $subaccount->contact_name ?? "Zeeshan jdfunnel"; // TODO: remove hardcoded name, phone, businessName
-        $contactPhone = $subaccount->contact_phone ?? "+923146363255";
-        $businessName = supersetting($key = 'crm_business_name') ?? "Mohsin Tech";
+        $contactName = $subaccount->contact_name; // TODO: remove hardcoded name, phone, businessName
+
+        $contactPhone = $subaccount->contact_phone;
+        $LocationName = $subaccount->location_name;
+
+        //$businessName = supersetting($key = 'crm_business_name') ?? "Mohsin Tech";
 
         $currency        = $subaccount->currency;
         $subaccountEmail = $subaccount->email;
@@ -268,7 +272,7 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
             'name'    => "Monthly Commission Invoice - {$startOfLastMonth->format('F Y')}",
             'currency'        => $currency,
             "businessDetails" => [
-                "name" => $businessName,
+                "name" => $$LocationName,
                 // "address" => [
                 //     "addressLine1" => "Central Park Housing Society, Lahore",
                 //     "city"         => "Lahore",
@@ -283,10 +287,9 @@ class ProcessMonthlyCommissionsChargeJob implements ShouldQueue
             // 'discount'        => ['value' => 0, 'type' => 'percentage'],
             'termsNotes'      => '<p>This is a default terms.</p>',
             'title'           => 'Monthly Transactions Commission Invoice',
-            // TODO: Call contactApi to get contact details Or retrive and save the contact details in user_settig on subaccount creation
             'contactDetails'  => [
                 "id"      => (string) $contactId,
-                "name"    => $contactName,
+                "name"    => $LocationName,
                 "phoneNo" => $contactPhone,
                 // "email"   => "zeeshanahmadjdfunnel@gmail.com",
             ],

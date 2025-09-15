@@ -16,6 +16,8 @@
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         :root {
             --primary-color: #6366f1;
@@ -262,6 +264,10 @@
                                 Dashboard
                             </a>
                         --}}
+                            <a class="nav-link {{ request()->routeIs('admin.profile.edit') ? 'active' : '' }}"
+                                href="{{ route('admin.profile.edit') }}">
+                                <i class="fas fa-user me-2"></i> Profile
+                            </a>
                             <a class="nav-link {{ request()->routeIs('admin.subaccounts') ? 'active' : '' }}"
                                 href="{{ route('admin.subaccounts') }}">
                                 <i class="fas fa-building me-2"></i>
@@ -289,6 +295,12 @@
                                 <i class="fas fa-cog me-2"></i>
                                 Settings
                             </a>
+
+                            <a href="javascript:void(0)" class="nav-link" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+
                         </nav>
                     </div>
                 </div>
@@ -306,9 +318,14 @@
                     @endif
 
                     @yield('content')
+
+
+                    <!-- Hidden logout form -->
+                    <form id="logoutForm" action="{{ route('logout') }}" method="GET" style="display:none;">
+                        @csrf
+                    </form>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -320,6 +337,8 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Global AJAX setup
@@ -371,6 +390,24 @@
         $(document).ready(function() {
             $('#sidebarToggle, .close-btn').on('click', function() {
                 $('.sidebar').toggleClass('active');
+            });
+        });
+
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out of the system.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
             });
         });
     </script>

@@ -22,10 +22,10 @@ class TransactionRepository
         return $this->model->find($id);
     }
 
-    public function findByBatchId($batchId)
-    {
-        return $this->model->where('batch_id', $batchId)->get();
-    }
+    // public function findByBatchId($batchId)
+    // {
+    //     return $this->model->where('batch_id', $batchId)->get();
+    // }
 
     public function findByLocationId($locationId)
     {
@@ -79,8 +79,8 @@ class TransactionRepository
         return false;
     }
 
-    public function findWithBatch()
-    {
-        return $this->model->with('batch')->get();
-    }
+    // public function findWithBatch()
+    // {
+    //     return $this->model->with('batch')->get();
+    // }
 }

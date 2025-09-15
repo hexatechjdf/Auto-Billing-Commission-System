@@ -259,7 +259,7 @@
 
 
         {{-- TODO: make sepaerete comment for this user updata form --}}
-        <div class="col-md-12 mt-4">
+        {{-- <div class="col-md-12 mt-4">
             <div class="card">
                 <div class="card-header">
                     <h4 class="h4">Update Profile</h4>
@@ -290,6 +290,7 @@
                 </div>
             </div>
         </div>
+        --}}
     </div>
 
     {{-- @include('components.crm-webhook-details') --}}

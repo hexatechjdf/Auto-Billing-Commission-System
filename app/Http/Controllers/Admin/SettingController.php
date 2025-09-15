@@ -24,6 +24,10 @@ class SettingController extends Controller
             // dd(CRM::getCompany($authuser));
 
             list($company_name, $company_id) = CRM::getCompany($authuser);
+            // if($company_name)
+            // {
+            //     save_settings('crm_business_name', $locationId);
+            // }
         }
 
         return view('admin.settings', get_defined_vars());
@@ -195,45 +199,4 @@ class SettingController extends Controller
             return response()->json(['status' => 'Error', 'message' => $e->getMessage()], 500);
         }
     }
-
-    // private function fetchSubaccountsFromGHL(): array
-    // {
-    //     // This should make actual API call to GHL
-    //     // For now, return mock data
-    //     return [
-    //         [
-    //             'id'           => 'loc_123456789',
-    //             'name'         => 'Main Location',
-    //             'address'      => '123 Main St, City, State',
-    //             'phone'        => '+1234567890',
-    //             'email'        => 'main@example.com',
-    //             'website'      => 'https://mainlocation.com',
-    //             'timezone'     => 'America/New_York',
-    //             'country'      => 'US',
-    //             'full_address' => '123 Main St, City, State 12345, US',
-    //         ],
-    //         [
-    //             'id'           => 'loc_987654321',
-    //             'name'         => 'Branch Location',
-    //             'address'      => '456 Branch Ave, City, State',
-    //             'phone'        => '+1987654321',
-    //             'email'        => 'branch@example.com',
-    //             'website'      => 'https://branchlocation.com',
-    //             'timezone'     => 'America/New_York',
-    //             'country'      => 'US',
-    //             'full_address' => '456 Branch Ave, City, State 54321, US',
-    //         ],
-    //         [
-    //             'id'           => 'loc_555666777',
-    //             'name'         => 'Remote Office',
-    //             'address'      => '789 Remote Rd, City, State',
-    //             'phone'        => '+1555666777',
-    //             'email'        => 'remote@example.com',
-    //             'website'      => 'https://remoteoffice.com',
-    //             'timezone'     => 'America/Los_Angeles',
-    //             'country'      => 'US',
-    //             'full_address' => '789 Remote Rd, City, State 98765, US',
-    //         ],
-    //     ];
-    // }
 }

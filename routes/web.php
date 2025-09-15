@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Auth\AutoAuthController;
 use App\Http\Controllers\HomeController;
@@ -36,7 +37,7 @@ Route::prefix('authorization')->name('crm.')->group(function () {
     Route::get('/crm/oauth/callback', [OAuthController::class, 'crmCallback'])->name('oauth_callback');
 });
 
-Route::group(['middleware' => ['auth']], function () { // middleware ['auth','isAdmin'];
+Route::group(['middleware' => ['auth', 'prevent-back-history']], function () { // middleware ['auth','isAdmin'];
 
     Route::get('home', [HomeController::class, 'home'])->name('home');
 
@@ -69,7 +70,10 @@ Route::group(['middleware' => ['auth']], function () { // middleware ['auth','is
             Route::get('/settings/locations', [SettingController::class, 'locations'])->name('setting.locations');
             Route::post('/settings/locations', [SettingController::class, 'locationsSet'])->name('setting.locations.set');
 
-            Route::put('/settings/user/profile/{id}', [SettingController::class, 'userProfile'])->name('setting.user.profile');
+            //Profile
+            // Route::put('/settings/user/profile/{id}', [SettingController::class, 'userProfile'])->name('setting.user.profile');
+            Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+            Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
             // Subaccounts
             Route::get('/settings/subaccounts', [SettingController::class, 'subAccounts'])->name('settings.subaccounts');

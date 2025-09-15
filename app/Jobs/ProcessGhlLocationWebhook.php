@@ -88,8 +88,7 @@ class ProcessGhlLocationWebhook implements ShouldQueue
             return;
         }
 
-
-        //  Handle Location Update (only if email was missing before)
+                                                                                            //  Handle Location Update (only if email was missing before)
         if ($type === 'LocationUpdate' && $email && $userSetting && ! $userSetting->email) { //TODO
             $userSetting->update(
                 $this->prepareUserSettingData($dbUserId, $locationId, $email, $subaccountCachedData)
@@ -107,17 +106,23 @@ class ProcessGhlLocationWebhook implements ShouldQueue
      */
     private function prepareUserSettingData(int $dbUserId, string $locationId, ?string $email, array $subaccountData): array
     {
+        $locationName = $this->payload['name'] ?? null;
+
         return [
             'user_id'                  => $dbUserId,
             'location_id'              => $locationId,
+            'location_name'            => $locationName,
             'email'                    => $email,
             'stripe_payment_method_id' => data_get($subaccountData, 'stripeData.stripe_payment_method_id'),
             'stripe_customer_id'       => data_get($subaccountData, 'stripeData.stripe_customer_id'),
             'contact_id'               => data_get($subaccountData, 'orderData.contactId'),
-            'threshold_amount'         => data_get($subaccountData, 'priceMappingData.threshold_amount'),
-            'currency'                 => data_get($subaccountData, 'priceMappingData.currency'),
+            'contact_phone'            => data_get($subaccountData, 'orderData.contactPhone'),
+            'contact_name'             => data_get($subaccountData, 'orderData.contactName'),
+            'threshold_amount'         => data_get($subaccountData, 'priceMappingData.threshold_amount', 0.00),
+            'currency'                 => data_get($subaccountData, 'priceMappingData.currency', 'USD'),
             'price_id'                 => data_get($subaccountData, 'priceMappingData.price_id'),
             'amount_charge_percent'    => data_get($subaccountData, 'priceMappingData.amount_charge_percent', 2.0),
         ];
+
     }
 }

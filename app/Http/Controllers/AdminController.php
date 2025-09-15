@@ -3,22 +3,13 @@ namespace App\Http\Controllers;
 
 use App\Services\OrderService;
 use App\Services\TransactionService;
-use App\Services\UserSettingService;
 
 class AdminController extends Controller
 {
-    protected $orderService;
-    protected $transactionService;
-    protected $userSettingService;
-
     public function __construct(
-        OrderService $orderService,
-        TransactionService $transactionService,
-        UserSettingService $userSettingService
+        protected OrderService $orderService,
+        protected TransactionService $transactionService,
     ) {
-        $this->orderService       = $orderService;
-        $this->transactionService = $transactionService;
-        $this->userSettingService = $userSettingService;
     }
 
     public function dashboard()

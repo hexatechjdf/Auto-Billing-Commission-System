@@ -38,7 +38,15 @@ class ChargeTransactionJob implements ShouldQueue
                 'status' => 2, // failed
                 'reason' => 'Missing Stripe customer or payment method ID',
             ]);
-            Log::error('Missing Stripe customer or payment method ID for transaction', ['transactionId' => $transactionId, 'locatoinId' => $transaction->location_id]);
+            //Log::error('Missing Stripe customer or payment method ID for transaction', ['transactionId' => $transactionId, 'locatoinId' => $transaction->location_id]);
+            return;
+        }
+
+        if (! $userSetting->chargeable) {
+            $transaction->update([
+                'status' => 2, // failed
+                'reason' => 'chargeable set as false',
+            ]);
             return;
         }
 

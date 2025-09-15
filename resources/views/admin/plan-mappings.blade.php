@@ -76,13 +76,13 @@
                     <!-- Mappings Content -->
                     <div id="mappings-content" class="d-none">
                         <!-- Sync Info -->
-                        <div class="alert alert-info mb-4">
+                        {{-- <div class="alert alert-info mb-4">
                             <i class="fas fa-info-circle me-2"></i>
                             <strong>Automatic Sync:</strong> Prices are automatically synced daily and when new prices are
                             created via webhooks.
                             You can also manually sync using the "Sync Prices" button above.
                         </div>
-
+                        --}}
                         <!-- Mappings Table -->
                         <div class="table-responsive">
                             <table id="mappings-table" class="table table-hover">

@@ -56,7 +56,7 @@ class ProcessGhlOrderStatusUpdate implements ShouldQueue
                 'currency'                     => $currency,
                 'amount_charge_percent'        => $amountChargePercent,
                 'calculated_commission_amount' => $calculatedCommissionAmount,
-                'transaction_id'               => null, // Will be updated later if needed
+                'transaction_id'               => null,
                 'status'                       => $status,
                 'payload'                      => $this->payload,
             ]
